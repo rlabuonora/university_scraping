@@ -121,7 +121,6 @@ scrap_programs <- function(start_page) {
 }
 
 scrap_programs(653)
-files <- list.files('./data', pattern = ".rds", full.names = TRUE)
 # Esto puede servir para retomar
 # current_page <- files %>% 
 #   str_extract("\\d{1,4}") %>% 
@@ -129,8 +128,10 @@ files <- list.files('./data', pattern = ".rds", full.names = TRUE)
 #   max()
 
 
-# read files
-df <- files %>%
+# read files and make one df
+files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
+programs <- files %>%
   as.list %>%
   purrr::map_df(~readRDS(.))
- 
+
+saveRDS(programs, './data/programs.rds') 
