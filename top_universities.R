@@ -79,8 +79,7 @@ extract_row <- function(card) {
 
 
 scrap_page <- function(i) {
-  # Afica link
-  url <- glue("https://www.topuniversities.com/programs/africa?region=[4010,4008]&page=[{i}]&pagerlimit=[25]")
+  url <- "https://www.topuniversities.com/programs/iran/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]"
   message(url)
   
   msg <- rs_driver_object$server$error()
@@ -136,35 +135,3 @@ df <- files %>%
   as.list %>%
   purrr::map_df(~readRDS(.))
  
-# >   remDr$errorDetails()
-# $ready
-# [1] TRUE
-# 
-# $message
-# [1] "Server is running"
-# 
-# $build
-# $build$revision
-# [1] "f148142cf8"
-# 
-# $build$time
-# [1] "2019-07-01T21:30:10"
-# 
-# $build$version
-# [1] "4.0.0-alpha-2"
-# 
-# 
-# $os
-# $os$arch
-# [1] "x86_64"
-# 
-# $os$name
-# [1] "Mac OS X"
-# 
-# $os$version
-# [1] "10.15.7"
-# 
-# 
-# $java
-# $java$version
-# [1] "11.0.11"

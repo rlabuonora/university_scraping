@@ -1,0 +1,1 @@
+# scrapear requirements (y tuition?)
