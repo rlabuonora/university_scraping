@@ -4,8 +4,6 @@ library(tidyverse)
 library(glue)
 
 
-
-
 # open browser
 
 
@@ -84,33 +82,32 @@ scrap_page <- function(i) {
   # Afica link
   url <- glue("https://www.topuniversities.com/programs/africa?region=[4010,4008]&page=[{i}]&pagerlimit=[25]")
   message(url)
+  
+  msg <- rs_driver_object$server$error()
+  message(paste0("Error: ", msg))
+  
   remDr$navigate(url)
   
   cards <- remDr$findElements(using="css", ".card")
   df <- purrr::map_df(cards, ~extract_row(.))
-  saveRDS(df, glue('./data/page_{i}.rds'))
+  saveRDS(df, glue('./temp/page_{i}.rds'))
 }
 
 
 scrap_programs <- function(start_page) {
   
-  # start the server
-  rs_driver_object <- rsDriver(browser='chrome',
-                               port=free_port(),
-                               chromever = "114.0.5735.16")
-  
-  remDr <- rs_driver_object$client
-  
   # First page
   url <- glue("https://www.topuniversities.com/programs/africa?region=[4010,4008]&pagerlimit=[25]")
   remDr$navigate(url)
-  #cookie_button <- remDr$findElement(using="class name", "eu-cookie-compliance-default-button")
-  #cookie_button$clickElement()
+  cookie_button <- remDr$findElement(using="class name", "eu-cookie-compliance-default-button")
+  cookie_button$clickElement()
   # Extract number of total programs in region
   programs_element <- remDr$findElement(using="class name", "number_uni_pgm")
   total_programs <- as.numeric(str_extract(programs_element$getElementText(), "\\d+"))
   last_page <- (total_programs %/% 25) + 1
   
+  msg <- rs_driver_object$server$error()
+  message(msg)
   # scrap pages
   df <- as.list(start_page:last_page) %>% 
     purrr::map_df(~scrap_page(.))
@@ -119,8 +116,14 @@ scrap_programs <- function(start_page) {
   remDr$close()
   
 }
+# start the server
+rs_driver_object <- rsDriver(browser='chrome',
+                             port=free_port(),
+                             chromever = "114.0.5735.16")
 
-scrap_programs(653)
+remDr <- rs_driver_object$client
+scrap_programs(2226)
+files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
 # Esto puede servir para retomar
 # current_page <- files %>% 
 #   str_extract("\\d{1,4}") %>% 
@@ -128,10 +131,40 @@ scrap_programs(653)
 #   max()
 
 
-# read files and make one df
-files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
-programs <- files %>%
+# read files
+df <- files %>%
   as.list %>%
   purrr::map_df(~readRDS(.))
-
-saveRDS(programs, './data/programs.rds') 
+ 
+# >   remDr$errorDetails()
+# $ready
+# [1] TRUE
+# 
+# $message
+# [1] "Server is running"
+# 
+# $build
+# $build$revision
+# [1] "f148142cf8"
+# 
+# $build$time
+# [1] "2019-07-01T21:30:10"
+# 
+# $build$version
+# [1] "4.0.0-alpha-2"
+# 
+# 
+# $os
+# $os$arch
+# [1] "x86_64"
+# 
+# $os$name
+# [1] "Mac OS X"
+# 
+# $os$version
+# [1] "10.15.7"
+# 
+# 
+# $java
+# $java$version
+# [1] "11.0.11"
