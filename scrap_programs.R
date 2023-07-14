@@ -13,5 +13,5 @@ programs <- readRDS('./data/programs.rds') %>%
          duration)
 
   
-programs_new <- bind_cols(map_df(programs$programe_link, scrap_program_page), programs)
-
+programs_requirements_fee <- bind_cols(map_df(programs$programe_link, scrap_program_page), programs)
+saveRDS(programs_requirements_fee, "./data/programs_requirements_fee.rds")
