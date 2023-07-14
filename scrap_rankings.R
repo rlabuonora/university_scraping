@@ -3,6 +3,7 @@ library(netstat)
 library(tidyverse)
 library(glue)
 
+# Scrap university rankings from THE website
 
 # start the server
 rs_driver_object <- rsDriver(browser='chrome',
