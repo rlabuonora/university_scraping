@@ -79,16 +79,22 @@ extract_row <- function(card) {
 
 
 scrap_page <- function(i) {
-  url <- "https://www.topuniversities.com/programs/iran/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]"
+  
+  url <- glue("https://www.topuniversities.com/programs/bahrain/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]&pagerlimit=[25]&page=[{i}]")
   message(url)
-  
-  msg <- rs_driver_object$server$error()
-  message(paste0("Error: ", msg))
-  
+
   remDr$navigate(url)
-  
   cards <- remDr$findElements(using="css", ".card")
+  message(length(cards))
+  if (length(cards)==0) {
+    # Wait 1 sec and retry
+    Sys.sleep(1)
+    cards <- remDr$findElements(using="css", ".card")
+    message(length(cards))
+  }
+  
   df <- purrr::map_df(cards, ~extract_row(.))
+  message(nrow(df))
   saveRDS(df, glue('./temp/page_{i}.rds'))
 }
 
@@ -96,7 +102,7 @@ scrap_page <- function(i) {
 scrap_programs <- function(start_page) {
   
   # First page
-  url <- glue("https://www.topuniversities.com/programs/africa?region=[4010,4008]&pagerlimit=[25]")
+  url <- "https://www.topuniversities.com/programs/bahrain/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]&pagerlimit=[25]"
   remDr$navigate(url)
   cookie_button <- remDr$findElement(using="class name", "eu-cookie-compliance-default-button")
   cookie_button$clickElement()
@@ -105,8 +111,6 @@ scrap_programs <- function(start_page) {
   total_programs <- as.numeric(str_extract(programs_element$getElementText(), "\\d+"))
   last_page <- (total_programs %/% 25) + 1
   
-  msg <- rs_driver_object$server$error()
-  message(msg)
   # scrap pages
   df <- as.list(start_page:last_page) %>% 
     purrr::map_df(~scrap_page(.))
@@ -121,7 +125,7 @@ rs_driver_object <- rsDriver(browser='chrome',
                              chromever = "114.0.5735.16")
 
 remDr <- rs_driver_object$client
-scrap_programs(2226)
+scrap_programs(1)
 files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
 # Esto puede servir para retomar
 # current_page <- files %>% 
@@ -131,7 +135,8 @@ files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
 
 
 # read files
-df <- files %>%
+programs <- files %>%
   as.list %>%
   purrr::map_df(~readRDS(.))
  
+saveRDS(programs, './data/programs.rds')
