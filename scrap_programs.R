@@ -1,14 +1,17 @@
+library(dplyr)
+library(purrr)
 source('./scrap_program_page.R')
 
 # Test it with a single url
-url <- "https://www.topuniversities.com/universities/university-law/postgrad/llm-mediation-alternative-dispute-resolution-part-time-online"
-scrap_program_page(url)
-
 # test it with the first 10 rows of program
-programs <- readRDS('./data/programs.rds')
-t <- programs %>% 
-  head(10) %>% 
-  pull(programe_link) %>% 
-  as.list() %>% 
-  purrr::map(~ scrap_program_page(.x))
+programs <- readRDS('./data/programs.rds') %>% 
+  janitor::clean_names() %>% 
+  select(programe_link, program_title,
+         university_name_text, university_link,
+         location, study_level, 
+         study_mode, course_intensity, subject,
+         duration)
+
   
+programs_new <- bind_cols(map_df(programs$programe_link, scrap_program_page), programs)
+

@@ -1,14 +1,25 @@
 library(rvest)
+library(stringr)
 
 # scrap country opts
-url <- "https://www.topuniversities.com/programs/iran/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]"
 # scrap program page using rvest
+url <- "https://www.topuniversities.com/universities/university-law/postgrad/llm-mediation-alternative-dispute-resolution-part-time-online"
+
 scrap_program_page <- function(url) {
+
+  message(url)
+  
   html <- read_html(url)
+  
   requirements <-  html %>% 
     html_element("#admissionTab") %>% 
     html_elements(".univ-subsection-full-width-value") %>% 
-    html_text()
+    html_text() %>% 
+    paste0(collapse = "")
+  
+  if(length(requirements)==0) {
+    requirements <- ""
+  }
   
   tuition_fee <- html %>% 
     html_element("#p2-tuition-fee-and-scholarships") %>% 
@@ -17,7 +28,11 @@ scrap_program_page <- function(url) {
     str_subset("Tuition Fee/year") %>% 
     head(1)
   
-  return(list(requirements=requirements, 
+  if(length(tuition_fee)==0) {
+    tuition_fee <- ""
+  }
+  
+  return(tibble(url=url, requirements=requirements, 
               tuition_fee=tuition_fee))
 }
 
