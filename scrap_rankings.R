@@ -45,7 +45,8 @@ rows <- remDr$findElements(using="xpath", "//tbody//tr[@role='row']")
 
 table_row_df_row_scores <- function(row) {
   
-  v <- c(overall_score         = extract_td(row, ".overall-score"),
+  v <- c(name             = extract_td(row, ".ranking-institution-title"),
+    overall_score         = extract_td(row, ".overall-score"),
     teaching              = extract_td(row, ".teaching-score"),
     research              = extract_td(row, ".research-score"),
     citations             = extract_td(row, ".citations-score"),
