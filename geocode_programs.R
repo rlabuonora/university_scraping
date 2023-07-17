@@ -3,7 +3,7 @@ library(tidygeocoder)
 library(dplyr)
 library(stringr)
 
-# Geolocate program locations
+# Geocode program locations
 programs <- readRDS('./data/programs_requirements_fee.rds') %>% 
   tibble() %>% 
   mutate(location=str_remove(location, "\\+1"))
