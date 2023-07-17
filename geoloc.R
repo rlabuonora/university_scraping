@@ -1,15 +1,27 @@
 library(tibble)
 library(tidygeocoder)
 library(dplyr)
+library(stringr)
 
-programs <- readRDS('./data/programs.rds') %>% 
-  tibble()  
+# Geolocate program locations
+programs <- readRDS('./data/programs_requirements_fee.rds') %>% 
+  tibble() %>% 
+  mutate(location=str_remove(location, "\\+1"))
 
 # locations
 locations <- programs %>% 
-  count(location)
+  count(location) %>% 
+  select(-n)
 
-geolocated <-locations %>% 
-  geocode(location, method = 'osm', lat = latitude , long = longitude)
+# API call
+geolocated_locations <-locations %>% 
+  geocode(location, method = 'google', lat = latitude , long = longitude)
 
-saveRDS(geolocated, './data/geolocated.rds')
+
+# Merge with program data
+programs <- programs %>% 
+  left_join(geolocated_locations, by="location")
+
+saveRDS(geolocated_locations, './data/geolocated_locations.rds')
+
+saveRDS(programs, "./data/programs_requirements_fee_geolocated.rds")
