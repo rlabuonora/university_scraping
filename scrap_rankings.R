@@ -30,7 +30,7 @@ extract_td <- function(row, klass) {
   text
 }
 
-# # Helper function to extract data from row element
+# Helper function to extract data from row element
 # from the rank table
 table_row_df_row_rank <- function(row) {
   v <- c(rank=extract_td(row, ".rank"),
@@ -42,10 +42,11 @@ table_row_df_row_rank <- function(row) {
   v
 }
 
+# scrap ranks
 ranks <- purrr::map_df(rows, ~table_row_df_row_rank(.))
 saveRDS(ranks, './data/ranks.rds')
 
-# Esto tirarlo a otro script
+# Scrap scores
 scores_url <- "https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/scores"
 remDr$navigate(scores_url)
 rows <- remDr$findElements(using="xpath", "//tbody//tr[@role='row']")

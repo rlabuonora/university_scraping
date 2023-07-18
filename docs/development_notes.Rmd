@@ -5,7 +5,7 @@ date: "2023-07-18"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
 ```
 
 ## Introduction
@@ -22,29 +22,38 @@ We also need a browser that works with RSelenium. The provided scripts work with
 
 ## Scraping topuniversities.com
 
-To start the scraping, the scripts uses RSelenium's `rsDriver` to connect to a browser.
+The program finder.
 
-The relevant data from this site is information from the programs. We scraped data for the subjects of Biological Sciences, Computer Science and Information Systems, Data Science, Genetics, Mathematics, Medicine Related Studies, Pharmacology, Pharmacy and Pharmacology, Physics and Astronomy, Statistics and Operational Research in Bahrain, Cyprus, Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Lebanon, Oman, Palestine, Qatar, Saudi Arabia, Syria, Turkey, United Arab Emirates (UAE) and Yemen.
-
-As a starting point, we navigate to the url that encodes a query for those programs. The website presents the data in pages of 25 elements. 
-
-This table features data from the programs, tuition and location data. Since the requirements are not available in this page, we save a link to the program's page on topuniversities.com to scrap the data from requirements and tuition in a second pass.
+![](./program.png)
 
 The script for scraping the initial program list is `scrap_programs.R`. This script has multiple functions to achieve this objective:
 
 - `extract_row`
 - `scrap_page`
-- `scrap_programs`. Navigates to:
+- `scrap_programs`
 
-https://www.topuniversities.com/programs/bahrain/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]&pagerlimit=[25]
+To start the scraping, the scripts uses RSelenium's `rsDriver` to connect to a browser:
 
-This is the starting point of the scraping task. From this website, the `scrap_page` function scraps pages one by one and saves the 25 results as R objects to the `data` folder.
+```{r}
+url <- "https://www.topuniversities.com/programs/bahrain/biological-sciences?country=[OM,PS,AE,BH,IR,IQ,JO,SA,KW,QA,SY,YE,CY,TR,IL,LB,GB,EG]&subjects=[462,468,4049,4055,494,496,554,500,502,508]&pagerlimit=[25]"
+remDr$navigate(url)
+```
+
 
 To scrap the data, it is necessary to understand the structure of the generated markup in each page. In this case, the data is presented inside a `div` element with a `card` class. This code `cards <- remDr$findElements(using="css", ".card")` finds all such elements. The helper function `extract_row` is applied to all found cards to extract all the available data.
 
 ![](./card.png)
 
-After scraping all the pages, we merge all the programs into a single data frame:
+The relevant data from this site is information from the programs. We scraped data for the subjects of Biological Sciences, Computer Science and Information Systems, Data Science, Genetics, Mathematics, Medicine Related Studies, Pharmacology, Pharmacy and Pharmacology, Physics and Astronomy, Statistics and Operational Research in Bahrain, Cyprus, Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Lebanon, Oman, Palestine, Qatar, Saudi Arabia, Syria, Turkey, United Arab Emirates (UAE) and Yemen. The url above encodes a query for those programs. The website presents the data in pages of 25 elements. 
+
+
+![](./paging.png)
+
+Since the website presents a page with 25 programs at a time, the scripts iterates through all the pages. The function `scrap_page(i)` scraps page i from this query. The 25 results from each page are saved to the `temp` folder.
+
+Since the requirements are not available in this page, we save a link to the program's page on topuniversities.com to scrap the data from requirements and tuition in a second pass.
+
+After scraping all the pages, we merge all the programs into a single data frame and save it.
 
 ```{r, eval=FALSE}
 files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
@@ -73,7 +82,7 @@ The website also renders data dynamically, so we connect to it through a browser
 
 ## Geocoding and merging
 
-To geocode the downloaded data, I used the Google Maps API (Link) and the `tidygeocoder` package. The script that does this is `geocode_programs.R`. To access the google maps API it is required to have an API key.
+To geocode the downloaded data, I used the [Google Maps API](https://developers.google.com/maps/) and the `tidygeocoder` [package](https://jessecambon.github.io/tidygeocoder/). The script that does this is `geocode_programs.R`. The Google maps API requires an API key.
 
 The final data for the Shiny app requires merging the data from different sources. Some of the university names are different, so a little bit of manual processing was necessary. That is achieved in the `merge_the_topuniversities.R` script.
 

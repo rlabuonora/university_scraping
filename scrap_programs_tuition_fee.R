@@ -3,8 +3,9 @@ library(purrr)
 library(rvest)
 library(stringr)
 
-# 1. Helper function 
 # Scrap a program page to get tuition fee and admission requirements
+
+# 1. Helper function 
 scrap_program_page <- function(url) {
   
   message(url)
