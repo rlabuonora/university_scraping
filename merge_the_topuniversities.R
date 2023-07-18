@@ -1,23 +1,19 @@
 # Merge data from both sources
 library(dplyr)
 # topuniversities
-programs_final <- readRDS('./data/programs_clean.rds')
+locations <- readRDS('./data/geolocated_locations.rds')
 
 # THE
 # Scores has no names
-scores <- readRDS('./data/scores.rds')
-ranks <- readRDS('./data/ranks.rds') %>% 
-  select(name, rank)
-
-the_data <- scores %>% 
-  left_join(ranks) %>% 
+scores <- readRDS('./data/scores.rds') %>% 
   rename(university=name)
+ranks <- readRDS('./data/ranks.rds') %>% 
+  select(university=name, rank)
 
-merge <- program_names %>% 
-  left_join(the_data)
+locations_the <- locations %>% 
+  left_join(ranks, by="university") %>% 
+  left_join(scores, by="university")
 
-not_found <- filter(merge, is.na(rank))
-
-saveRDS(merge, './data_output/universities.rds')
+saveRDS(locations_the, './data_output/locations_the.rds')
 
 
