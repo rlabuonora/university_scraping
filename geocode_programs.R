@@ -24,4 +24,4 @@ programs <- programs %>%
 
 saveRDS(geolocated_locations, './data/geolocated_locations.rds')
 
-saveRDS(programs, "./data/programs_requirements_fee_geolocated.rds")
+saveRDS(programs, "./data_output/programs_requirements_fee_geolocated.rds")

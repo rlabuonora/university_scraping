@@ -52,6 +52,6 @@ merge <- program_names %>%
 
 not_found <- filter(merge, is.na(rank))
 
-
+saveRDS(merge, './data_output/universities.rds')
 
 

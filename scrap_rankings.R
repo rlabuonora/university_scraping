@@ -11,12 +11,16 @@ rs_driver_object <- rsDriver(browser='chrome',
                              chromever = "114.0.5735.16")
 remDr <- rs_driver_object$client
 
+# Navigate to base url
 ranking_url <- "https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/stats"
 remDr$navigate(ranking_url)
+
+# accept cookies
 cookie_button <- remDr$findElement(using="class name", "eu-cookie-compliance-default-button")
 cookie_button$clickElement()
 rows <- remDr$findElements(using="xpath", "//tbody//tr[@role='row']")
 
+# Helper function to extract element from page
 extract_td <- function(row, klass) {
   # name
   element <- row$findChildElement(using="css", klass) %>% 
@@ -26,6 +30,8 @@ extract_td <- function(row, klass) {
   text
 }
 
+# # Helper function to extract data from row element
+# from the rank table
 table_row_df_row_rank <- function(row) {
   v <- c(rank=extract_td(row, ".rank"),
     name=extract_td(row, ".ranking-institution-title"),
@@ -35,14 +41,18 @@ table_row_df_row_rank <- function(row) {
   
   v
 }
+
 ranks <- purrr::map_df(rows, ~table_row_df_row_rank(.))
-saveRDS(ranks, 'ranks.rds')
+saveRDS(ranks, './data/ranks.rds')
 
 # Esto tirarlo a otro script
 scores_url <- "https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/scores"
 remDr$navigate(scores_url)
 rows <- remDr$findElements(using="xpath", "//tbody//tr[@role='row']")
 
+
+# # Helper function to extract data from row element
+# from the scores table
 table_row_df_row_scores <- function(row) {
   
   v <- c(name             = extract_td(row, ".ranking-institution-title"),
@@ -55,6 +65,7 @@ table_row_df_row_scores <- function(row) {
   v
 }
 
+# Iterate on every row
 scores <- purrr::map_df(rows, ~table_row_df_row_scores(.))
-saveRDS(scores, 'scores.rds')
+saveRDS(scores, './data/scores.rds')
 remDr$close()
