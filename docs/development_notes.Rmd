@@ -81,12 +81,12 @@ saveRDS(programs, './data/programs.rds')
 
 ### Scraping the requirements and tuitions data
 
-The script `scrap_programs_tution_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
+The script `scrap_programs_tuition_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
 
 Since these are static html pages, it is not necessary to use a browser to access this data. The html pages are downloaded with `rvest::read_html`.
 
 
-This is how the webpages presents the tution fee data:
+This is how the webpages presents the tuition fee data:
 
 ![](./fees.png)
 
@@ -125,11 +125,12 @@ tibble::tibble(
 ```
 
 
-The final dataset has 5356 programs. Here are the basic stats from the dataset:
+The final dataset is located in `'../data_output/programs_geolocated.rds'` and has 5356 programs. Here are the basic stats from the dataset:
 
 ```{r eval=TRUE}
 df <- readRDS('../data_output/programs_geolocated.rds')
-skimr::skim(df)
+skimr::skim(df) %>% 
+  select(-numeric.hist, -starts_with("numeric.p"), -character.whitespace, -character.min, -character.max)
 ```
 
 
@@ -142,14 +143,34 @@ The data is presented in a single page, so it is easier to scrap. The script tha
 The scraped data is located in `data_output/the_ranking_data.rds`, and it includes 267 universities with its ranking and scores on the following categories: overall score, teaching, research, citations, industry income and international outlook.
 
 ```{r eval=TRUE}
-ranks <- readRDS('../data_output/the_ranking_data.rds')
-skimr::skim(ranks)
+the_ranking_data <- readRDS('../data_output/the_ranking_data.rds')
+skimr::skim(the_ranking_data) %>% 
+  select(-numeric.hist, -starts_with("numeric.p"), -character.whitespace, -character.min, -character.max)
 ```
 
-## Geocoding and merging
+## Geocoding
 
 To geocode the downloaded data, we used the [Google Maps API](https://developers.google.com/maps/) and the `tidygeocoder` [package](https://jessecambon.github.io/tidygeocoder/). The script that does this is `geocode_programs.R`. The Google maps API requires an API key.
 
-The final data for the Shiny app requires merging the data from different sources. Some of the university names are different, so a little bit of manual processing was necessary.
+## Scripts
 
+#### scrap_times_higher_education.R
+
+Downloads data from [THE](https://www.timeshighereducation.com/) and outputs `./data/ranks.rds` and `./data/scores.rds`.
+
+#### scrap_programs_tuition_fee.R
+
+Takes `./data/programs.rds` as input, downloads tuition and requirements data and outputs `./data/programs_requirements_fee.rds`.
+
+#### `clean_top_universities.R`
+
+Takes `./data/programs_requirements_fee.rds` as input, wrangles requirements data, converts tuition fees, filters programs not related to Bioinformatics, etc, recodes university names to match the names from the Times Higher Education website and merges the program data with the `/data/geolocated_locations.rds` dataset.
+
+#### `geocode.R`
+
+Takes `'./data/programs_clean.rds'` as input adds coordinates and outputs `./data_output/programs_geolocated.rds`.
+ 
+### `merge_the_topuniversities.R`
+
+Takes `./data/geolocated_locations.rds`, `ranks.rds` and `scores.rds` as input and outputs a single data frame with all the locations with coordinates and the rankings and scores of the corresponding universities. 
 
