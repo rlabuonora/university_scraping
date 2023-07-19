@@ -125,23 +125,31 @@ tibble::tibble(
 ```
 
 
-The final dataset:
+The final dataset has 5356 programs. Here are the basic stats from the dataset:
 
 ```{r eval=TRUE}
-df <- readRDS('../data/programs_requirements.rds')
+df <- readRDS('../data_output/programs_geolocated.rds')
 skimr::skim(df)
 ```
 
 
 ## Scraping timeshighereducation.com
 
-The relevant data from this website is in two pages:
+The website also renders data dynamically, so we connect to it through a browser. The initial url is https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/stats
 
-The website also renders data dynamically, so we connect to it through a browser. The data is presented in a single page, so it is easier to scrap. The script that does this job is `scrap_rankings.R`.
+The data is presented in a single page, so it is easier to scrap. The script that achieves this is `scrap_rankings.R`. It uses the same functions from `Rselenium` and another custom function to extract the data from the webpage. 
 
+The scraped data is located in `data_output/the_ranking_data.rds`, and it includes 267 universities with its ranking and scores on the following categories: overall score, teaching, research, citations, industry income and international outlook.
+
+```{r eval=TRUE}
+ranks <- readRDS('../data_output/the_ranking_data.rds')
+skimr::skim(ranks)
+```
 
 ## Geocoding and merging
 
 To geocode the downloaded data, we used the [Google Maps API](https://developers.google.com/maps/) and the `tidygeocoder` [package](https://jessecambon.github.io/tidygeocoder/). The script that does this is `geocode_programs.R`. The Google maps API requires an API key.
 
-The final data for the Shiny app requires merging the data from different sources. Some of the university names are different, so a little bit of manual processing was necessary. That is achieved in the `merge_the_topuniversities.R` script.
+The final data for the Shiny app requires merging the data from different sources. Some of the university names are different, so a little bit of manual processing was necessary.
+
+
