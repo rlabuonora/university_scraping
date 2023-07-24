@@ -2,6 +2,7 @@ library(dplyr)
 library(readr)
 library(stringr)
 library(tidyr)
+
 # Clean topuniversities.com data
 programs <- readRDS("./data/programs_requirements_fee.rds")
 
@@ -140,9 +141,7 @@ programs_clean <- programs_clean %>%
 # "Biological Sciences"
 # "Physics and Astronomy"
 # "Geography"
+
 saveRDS(programs_clean, "./data/programs_clean.rds")
 
-locations <- readRDS('./data/geolocated_locations.rds')
-programs_clean <- left_join(programs_clean, locations)
-saveRDS(programs_clean, "./data_output/programs_geolocated.rds")
 

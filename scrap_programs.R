@@ -117,9 +117,10 @@ rs_driver_object <- rsDriver(browser='chrome',
 remDr <- rs_driver_object$client
 scrap_programs(1)
 
+# A vector with all the downloaded files
 files <- list.files('./temp', pattern = ".rds", full.names = TRUE)
 
-# read files and merge
+# Merge in a single data frame
 programs <- files %>%
   as.list %>%
   purrr::map_df(~readRDS(.))

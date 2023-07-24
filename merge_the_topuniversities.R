@@ -7,6 +7,7 @@ locations <- readRDS('./data/geolocated_locations.rds')
 # Scores has no names
 scores <- readRDS('./data/scores.rds') %>% 
   rename(university=name)
+
 ranks <- readRDS('./data/ranks.rds') %>% 
   select(university=name, rank)
 
