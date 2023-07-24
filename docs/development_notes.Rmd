@@ -12,9 +12,7 @@ library(dplyr)
 
 ## Introduction
 
-These are the development notes for scraping data from [Top Universities](www.topuniversities.com) and [Times Higher Education](www.timeshighereducation.com). Since, both websites present data as dynamic content they require the use of a headless browser to simulate the user clicking through the sites to generate the content. 
-
-The best tool for that kind of scraping in the R ecosystem is [RSelenium](https://docs.ropensci.org/RSelenium/).
+These are the development notes for scraping data from [Top Universities](www.topuniversities.com) and [Times Higher Education](www.timeshighereducation.com). Since both websites present data as dynamic content they require the use of a headless browser to simulate the user clicking through the sites to generate the content. The best tool for that kind of scraping in the R ecosystem is [RSelenium](https://docs.ropensci.org/RSelenium/).
 
 ## Installing RSelenium
 
@@ -81,12 +79,12 @@ saveRDS(programs, './data/programs.rds')
 
 ### Scraping the requirements and tuitions data
 
-The script `scrap_programs_tution_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
+The script `scrap_programs_tuiton_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
 
 Since these are static html pages, it is not necessary to use a browser to access this data. The html pages are downloaded with `rvest::read_html`.
 
 
-This is how the webpages presents the tution fee data:
+This is how the webpages presents the tuition fee data:
 
 ![](./fees.png)
 

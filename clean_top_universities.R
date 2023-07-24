@@ -1,6 +1,7 @@
 library(dplyr)
 library(readr)
-
+library(stringr)
+library(tidyr)
 # Clean topuniversities.com data
 programs <- readRDS("./data/programs_requirements_fee.rds")
 
@@ -89,10 +90,10 @@ programs_clean <- programs %>%
   mutate(duration_length=as.numeric(str_match(duration, "(\\d+) (Months)")[,2])) %>% 
   mutate(duration_units=str_match(duration, "(\\d+) (Months)")[,3]) %>% 
   mutate(fee_gbp=case_when(currency=="GBP"~fee,
-                           currency=="USD"~fee*1.3,
-                           currency=="EUR"~fee*1.16,
+                           currency=="USD"~fee/1.3,
+                           currency=="EUR"~fee/1.16,
                            # singapore dollar
-                           currency=="SGD"~fee*1.72,
+                           currency=="SGD"~fee/1.72,
                            TRUE~NA_real_))
 
 # Fix requirements data
@@ -125,7 +126,11 @@ programs_clean <- programs_clean %>%
 
 programs_clean <- programs_clean %>% 
   pivot_wider(names_from = variable, values_from = value, values_fill = NA) %>%
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  mutate(ielts = if_else(is.na(ielts), 0, ielts)) %>% 
+  filter(ielts<=9) %>% # ielts must be 0-9
+  mutate(toefl = if_else(is.na(toefl), 0, toefl)) %>% 
+  filter(toefl<=120)
 
 
 # Estos subjects tienen algunos que pueden servir
