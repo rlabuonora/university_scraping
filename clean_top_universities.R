@@ -3,6 +3,10 @@ library(readr)
 library(stringr)
 library(tidyr)
 
+library(tm)
+
+
+
 # Clean topuniversities.com data
 programs <- readRDS("./data/programs_requirements_fee.rds")
 
@@ -74,6 +78,7 @@ programs_clean <- programs %>%
       "Theology, Divinity and Religious Studies",
       "Sports-related Courses",
       "Linguistics",
+      "Pharmacology",
       "Environmental Sciences",
       "History",
       "Food Science",
@@ -134,13 +139,61 @@ programs_clean <- programs_clean %>%
   filter(toefl<=120)
 
 
-# Estos subjects tienen algunos que pueden servir
-# "Education and Training"
-# "Genetics"
-# "Psychology
-# "Biological Sciences"
-# "Physics and Astronomy"
-# "Geography"
+# Use keywords to keep relevant programs
+# in some subjects
+
+# Subjects that include relevant programs
+subjs <- c("Education and Training",
+           "Genetics",
+           "Psychology",
+           "Mathematics",
+           "Pharmacy and Pharmacology",
+           "Medicine Related Studies",
+           "Biological Sciences",
+           "Physics and Astronomy",
+           "Geography",
+           "Medicine",
+           "Medicine Related Studies",
+           "Genetics", 
+           "Health/Healthcare")
+
+# Keywords to keep
+keywords_keep <- c("data", "information", "engineering", "digital",
+                   "computational", "computer", "bioinformatics",
+                   "intelligence", "cyber", "datamining", "operational",
+                   "biotechnology", "computing") %>% 
+  paste0(collapse = "|")
+
+
+# Generate keywords
+# Create a corpus
+docs <- Corpus(VectorSource(programs_clean$program_title))
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove your own stop word
+# specify your stopwords as a character vector
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+programs_clean$keywords <- docs$content
+
+# Keep programs with relevant keywords
+programs_clean <- mutate(programs_clean,
+                              key=str_detect(keywords,
+                                             keywords_keep),
+                              subj = subject %in% subjs ) %>% 
+  mutate(keep=(key | ! subj)) %>% 
+  select(-key, -subj) %>% 
+  filter(keep)
 
 saveRDS(programs_clean, "./data/programs_clean.rds")
 
