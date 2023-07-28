@@ -5,7 +5,7 @@ library(stringr)
 programs_geolocated <- readRDS("./data_output/programs_geolocated.rds")
 # topuniversities
 locations <- programs_geolocated %>% 
-  group_by(university) %>% 
+  group_by(university, location, longitude, latitude) %>% 
   summarize(programs=n())
 
 # THE
@@ -25,6 +25,6 @@ universities <- locations %>%
   left_join(ranks, by="university") %>% 
   left_join(scores, by="university")
 
-saveRDS(locations_the, './data_output/universities.rds')
+saveRDS(universities, './data_output/universities.rds')
 
 
