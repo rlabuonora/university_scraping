@@ -11,6 +11,7 @@ library(tm)
 programs <- readRDS("./data/programs_requirements_fee.rds")
 
 programs_clean <- programs %>% 
+  # Fix program titles
   mutate(fee=parse_number(str_match(tuition_fee, "(\\d{1,3},?\\d{3})\\s(\\w{3})")[, 2])) %>% 
   mutate(currency=str_match(tuition_fee, "(\\d{1,3},?\\d{3})\\s(\\w{3})")[, 3]) %>% 
   select(university=university_name_text,
@@ -20,6 +21,7 @@ programs_clean <- programs %>%
          program_title, program_link=programe_link,
          subject, study_mode, course_intensity, 
          duration, fee, currency) %>% 
+  # Fix university names that do not match with THE website
   mutate(university=str_remove(university, "^The ")) %>% 
   mutate(university=case_when(
     university=="Anglia Ruskin University"~"Anglia Ruskin University (ARU)",
@@ -51,50 +53,10 @@ programs_clean <- programs %>%
     TRUE ~ university
     # university== ~"University of Edinburgh"
   )) %>% 
-  filter(
-    ! program_title %in% c(
-      "Accounting & Finance and Human Biology BA (Hons)",
-      "MSc Sustainable and Efficient Food Production", # Appears twice
-      "Dance and Human Biology BA (Hons) (with Foundation Year)",
-      "MSc Criminological Research",
-      "Criminology and Forensic Biology",
-      "Forensic Science and Human Biology BSc (Hons) with Foundation Year",
-      "Forensic Science and Physics BSc (Hons) with International Year",
-      "Forensic Science and Neuroscience BSc (Hons)",
-      "Criminology and Forensic Biology",
-      "Forensic Science and Human Biology BSc (Hons) with International Year",
-      "Forensic Science and Physics BSc (Hons)",
-      "Criminology and Forensic Biology",
-      "Forensic Science and Physics BSc (Hons) with International Year"
-    )) %>% 
-   filter(
-    ! subject %in% c(
-      "Anatomy and Physiology", # remove
-      "Anthropology",
-      "Archaeology",
-      "Zoology",
-      "Dentistry",
-      "Veterinary Science",
-      "Theology, Divinity and Religious Studies",
-      "Sports-related Courses",
-      "Linguistics",
-      "Pharmacology",
-      "Environmental Sciences",
-      "History",
-      "Food Science",
-      "Chemistry",
-      "English Language and Literature",
-      "Geology",
-      "Public Policy",
-      "Nursing",
-      "Toxicology",
-      "Philosophy",
-      "Earth and Marine Sciences",
-      "Ethnicity, Gender and Diversity")) %>% 
-  filter(subject != "Sociology" |  (program_title  %in% c("MSc Social Statistics and Social Research",
-                                                           "BSc Sociology with Data Science (including foundation Year)"))) %>% 
   mutate(duration_length=as.numeric(str_match(duration, "(\\d+) (Months)")[,2])) %>% 
+  # Fix duration variable
   mutate(duration_units=str_match(duration, "(\\d+) (Months)")[,3]) %>% 
+  # Convert currencies
   mutate(fee_gbp=case_when(currency=="GBP"~fee,
                            currency=="USD"~fee/1.3,
                            currency=="EUR"~fee/1.16,
@@ -143,19 +105,42 @@ programs_clean <- programs_clean %>%
 # in some subjects
 
 # Subjects that include relevant programs
-subjs <- c("Education and Training",
-           "Genetics",
-           "Psychology",
-           "Mathematics",
-           "Pharmacy and Pharmacology",
-           "Medicine Related Studies",
-           "Biological Sciences",
-           "Physics and Astronomy",
-           "Geography",
-           "Medicine",
-           "Medicine Related Studies",
-           "Genetics", 
-           "Health/Healthcare")
+subjs <- c(
+  "Anatomy and Physiology", # remove
+  "Anthropology",
+  "Archaeology",
+  "Zoology",
+  "Dentistry",
+  "Veterinary Science",
+  "Theology, Divinity and Religious Studies",
+  "Sports-related Courses",
+  "Linguistics",
+  "Pharmacology",
+  "History",
+  "Food Science",
+  "English Language and Literature",
+  "Geology",
+  "Public Policy",
+  "Nursing",
+  "Toxicology",
+  "Philosophy",
+  "Ethnicity, Gender and Diversity",
+  "Biological Sciences",
+  "Education and Training",
+  "Chemistry",
+  "Genetics",
+  "Geography",
+  "Health/Healthcare",
+  "Law and Legal Studies",
+  "Mathematics",
+  "Medicine",      
+  "Earth and Marine Sciences",
+  "Environmental Sciences",
+  "Medicine Related Studies",
+  "Psychology",
+  "Pharmacy and Pharmacology",
+  "Physics and Astronomy",
+  "Sociology")
 
 # Keywords to keep
 keywords_keep <- c("data", "information", "engineering", "digital",
@@ -177,8 +162,6 @@ docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeNumbers)
 # Remove english common stopwords
 docs <- tm_map(docs, removeWords, stopwords("english"))
-# Remove your own stop word
-# specify your stopwords as a character vector
 # Remove punctuations
 docs <- tm_map(docs, removePunctuation)
 # Eliminate extra white spaces
@@ -192,8 +175,8 @@ programs_clean <- mutate(programs_clean,
                                              keywords_keep),
                               subj = subject %in% subjs ) %>% 
   mutate(keep=(key | ! subj)) %>% 
-  select(-key, -subj) %>% 
-  filter(keep)
+  filter(keep) %>% 
+  select(-key, -subj, -keywords, -keep, -university_link, -program_link) 
 
 saveRDS(programs_clean, "./data/programs_clean.rds")
 

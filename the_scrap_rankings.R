@@ -61,7 +61,7 @@ table_row_df_row_scores <- function(row) {
     teaching              = extract_td(row, ".teaching-score"),
     research              = extract_td(row, ".research-score"),
     citations             = extract_td(row, ".citations-score"),
-    industry_income.      = extract_td(row, ".citations-score"),
+    industry_income      = extract_td(row, ".citations-score"),
     international_outlook =extract_td(row, ".industry_income-score"))
   v
 }

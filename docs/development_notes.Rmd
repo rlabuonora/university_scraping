@@ -16,7 +16,7 @@ These are the development notes for scraping data from [Top Universities](www.to
 
 ## Installing RSelenium
 
-RSelenium requires the `Rjava` package. `Rjava`, in turn, requires access to the Java runtime. I recommend installing [Azul Java](https://www.azul.com/downloads/#zulu). Instructions vary with OS. 
+RSelenium requires the `Rjava` package. `Rjava`, in turn, requires access to the Java runtime. For Windows machines, Detailed installation instructions can be found in [this tutorial](https://www.youtube.com/watch?v=GnpJujF9dBw).
 
 We also need a browser that works with RSelenium. The provided scripts work with Chrome.
 
@@ -79,11 +79,7 @@ saveRDS(programs, './data/programs.rds')
 
 ### Scraping the requirements and tuitions data
 
-<<<<<<< HEAD
-The script `scrap_programs_tuiton_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
-=======
-The script `scrap_programs_tuition_fees.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
->>>>>>> 1204547399cb447b4f59b54bde58899d60e84e4e
+The script `top_univeristies_scrap_programs_tuition_fee.R` takes the list of urls scraped previously and downloads the tuition fee and requirements data from the program pages. 
 
 Since these are static html pages, it is not necessary to use a browser to access this data. The html pages are downloaded with `rvest::read_html`.
 
@@ -140,7 +136,7 @@ skimr::skim(df) %>%
 
 The website also renders data dynamically, so we connect to it through a browser. The initial url is https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/stats
 
-The data is presented in a single page, so it is easier to scrap. The script that achieves this is `scrap_rankings.R`. It uses the same functions from `Rselenium` and another custom function to extract the data from the webpage. 
+The data is presented in a single page, so it is easier to scrap. The script that achieves this is `the_scrap_rankings.R`. It uses the same functions from `Rselenium` and another custom function to extract the data from the webpage. 
 
 The scraped data is located in `data_output/the_ranking_data.rds`, and it includes 267 universities with its ranking and scores on the following categories: overall score, teaching, research, citations, industry income and international outlook.
 
@@ -156,23 +152,23 @@ To geocode the downloaded data, we used the [Google Maps API](https://developers
 
 ## Scripts
 
-#### scrap_times_higher_education.R
+#### the_scrap_rankings.R
 
 Downloads data from [THE](https://www.timeshighereducation.com/) and outputs `./data/ranks.rds` and `./data/scores.rds`.
 
-#### scrap_programs_tuition_fee.R
+#### top_univeristies_scrap_programs_tuition_fee.R
 
 Takes `./data/programs.rds` as input, downloads tuition and requirements data and outputs `./data/programs_requirements_fee.rds`.
 
-#### `clean_top_universities.R`
+#### `top_universities_clean.R`
 
 Takes `./data/programs_requirements_fee.rds` as input, wrangles requirements data, converts tuition fees, filters programs not related to Bioinformatics, etc, recodes university names to match the names from the Times Higher Education website and merges the program data with the `/data/geolocated_locations.rds` dataset.
 
-#### `geocode.R`
+#### `top_universities_geocode.R`
 
 Takes `'./data/programs_clean.rds'` as input adds coordinates and outputs `./data_output/programs_geolocated.rds`.
  
-### `merge_the_topuniversities.R`
+### `the_clean.R`
 
 Takes `./data/geolocated_locations.rds`, `ranks.rds` and `scores.rds` as input and outputs a single data frame with all the locations with coordinates and the rankings and scores of the corresponding universities. 
 
