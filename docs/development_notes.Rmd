@@ -132,6 +132,12 @@ skimr::skim(df) %>%
 ```
 
 
+### Filtering relevant programs in interdisciplinary subjects
+
+topuniversities.com classifies the programs by subject. While, some subjects are directly related to Data Science and Machine Learning, others, like Biology include traditional programs and others related to Machine Learning (Bioinformatics, etc.).
+
+To classify this programs, I extracted keywords from the program titles and kept titles with some relevant keywords (data, intelligence, computational, etc.). The keywords are extracting using R's `tm` package.
+
 ## Scraping timeshighereducation.com
 
 The website also renders data dynamically, so we connect to it through a browser. The initial url is https://www.timeshighereducation.com/world-university-rankings/2023/world-ranking#!/length/-1/sort_by/rank/sort_order/asc/cols/stats
